@@ -104,7 +104,8 @@ def classify(cmd, spv, env):
         v = subprocess.run([VAL, "--target-env", "vulkan1.3", spv], capture_output=True, text=True)
         return ("VALID", "") if v.returncode == 0 else ("INVALID", (v.stderr.strip().splitlines() or [""])[0][:150])
     if o.startswith("THROW"):
-        return ("THROW", o[6:].split(" RecompileRequest:")[0][:250])
+        d = o[6:].split(" RecompileRequest:")[0]
+        return ("THROW", d if len(d) <= 250 else d[:170] + " ... " + d[-80:])
     return ("CRASH", o[:150] or f"rc={rc}")
 
 

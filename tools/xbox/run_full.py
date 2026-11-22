@@ -242,9 +242,10 @@ def main():
     IDX = set(open(args[args.index("--idx-file") + 1]).read().split()) if "--idx-file" in args else None
     rows = [r for r in csv.DictReader(open(MANIFEST)) if (ONLY is None or r["stage"] == ONLY) and (IDX is None or r["idx"] in IDX)]
     jobs = [(r, x) for r in rows for x in ((False, True) if r["stage"] == "PS" else (False,)) if (r["idx"], x) not in skip]
-    # result cache (build dir): a job whose inputs hash the same as in an earlier run reuses that result
+    # result cache (build dir, else next to OUT): a job whose inputs hash the same as in an earlier run reuses that result
     use_cache = "--no-cache" not in args
-    cache_path, cost_path = BUILD + "run_full_cache.json", BUILD + "run_full_costs.json"
+    state_dir = BUILD if os.path.isdir(BUILD) else os.path.dirname(os.path.abspath(OUT)) + os.sep
+    cache_path, cost_path = state_dir + "run_full_cache.json", state_dir + "run_full_costs.json"
     cache = json.load(open(cache_path)) if use_cache and os.path.exists(cache_path) else {}
     costs = json.load(open(cost_path)) if os.path.exists(cost_path) else {}
     out, todo, keys = [], [], {}
